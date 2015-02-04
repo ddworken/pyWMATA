@@ -46,3 +46,12 @@ Note: This requires that the two stations be on the same line, this will not wor
   stopsAlongPath = getPath(startStationCode, endStationCode)
 ````
 Returns a list of station names along the path
+
+====
+To get a station code for a given station
+```python
+  stationName = 'Woodley'
+  
+  stationCode = getStationcode(stationName)
+````
+Returns either a station code or None
