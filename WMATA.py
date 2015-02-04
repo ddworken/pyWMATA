@@ -74,6 +74,12 @@ class WMATA(object):
                 incidents.append(incident.toxml())
         return incidents
 
+    def getElevatorEscalatorIncidentsAtStation(self, stationCode):
+        dom = self.getDom('https://api.wmata.com/Incidents.svc/ElevatorIncidents?')
+        if stationCode in dom.toxml():
+            return True
+        return False
+
     def getStationcode(self, stationname):
         dom = self.getDom('https://api.wmata.com/Rail.svc/Stations?')
         for nameIndex,name in enumerate(dom.getElementsByTagName('Name')):
