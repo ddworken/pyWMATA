@@ -63,7 +63,7 @@ class WMATA(object):
         dom = self.getDom('https://api.wmata.com/Incidents.svc/Incidents?')
         incidents = []
         for incident in dom.getElementsByTagName('Description'):
-            incidents.append(incident)
+            incidents.append(incident.toxml())
         return incidents
 
     def getIncidentsOnLine(self, line):
@@ -71,8 +71,15 @@ class WMATA(object):
         incidents = []
         for incidentIndex,incident in enumerate(dom.getElementsByTagName('Description')):
             if line in dom.getElementByTagName('LinesAffected')[incidentIndex].toxml():
-                incidents.append(incident)
+                incidents.append(incident.toxml())
         return incidents
+
+    def getStationcode(self, stationname):
+        dom = self.getDom('https://api.wmata.com/Rail.svc/Stations?')
+        for nameIndex,name in enumerate(dom.getElementsByTagName('Name')):
+            if stationname.lower() in name.toxml().lower():
+                return dom.getElementsByTagName('Code')[nameIndex].toxml().replace('<Code>','').replace('</Code>','')
+
 
     def getDom(self, url):
         try:
