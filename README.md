@@ -65,3 +65,12 @@ To get a station close to a location
   nearestStationCode = getNearestStation(lat, lon)
 ```
 Returns the closest stationcode to the supplied location.
+
+====
+To check if their is an escalator or elevator problem at a station
+```python
+  stationCode = 'C13'
+  
+  elevatorsAndEscalatorsIncident = getElevatorEscalatorIncidentsAtStation(stationCode)
+```
+Returns True if there is an elevator or escalator outage and False if there is not.
