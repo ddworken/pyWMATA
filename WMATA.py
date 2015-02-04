@@ -80,10 +80,13 @@ class WMATA(object):
             if stationname.lower() in name.toxml().lower():
                 return dom.getElementsByTagName('Code')[nameIndex].toxml().replace('<Code>','').replace('</Code>','')
 
-
     def getDom(self, url):
         try:
             xml = urllib2.urlopen(url + 'api_key=' + self.apikey + '&subscription-key=' + self.apikey)
             return parseString(xml.read())
         except:
             print "Network communication error"
+
+    def getNearestStation(self, lat, lon):
+        dom = self.getDom('https://api.wmata.com/Rail.svc/StationEntrances?Lat=' + lat + '&Lon=' + lon + '&Radius=0&')
+        return dom.getElementsByTagName('StationCode1')[0].toxml().replace('<StationCode1>','').replace('</StationCode1>','')
