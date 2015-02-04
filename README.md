@@ -14,7 +14,7 @@ To get departure times for a given stationcode
 
   times = api.getTrainDepartures(stationcode)
 ```
-Returns a list of times until train departures from the given station. 
+Returns a list of times until train departures from the given station.
 
 =====
 To get departure times for a given stationcode in a certain direction
@@ -23,7 +23,7 @@ To get departure times for a given stationcode in a certain direction
   
   times = api.getTrainDepartures(stationcode, 'Huntington', 'Franconia-Springfield')
   ```
-Returns a list of times until train departures from the given station in the given direction. 
+Returns a list of times until train departures from the given station in the given direction.
 
 =====
 To get travel time needed to travel from one station to another
@@ -45,7 +45,7 @@ Note: This requires that the two stations be on the same line, this will not wor
   
   stopsAlongPath = getPath(startStationCode, endStationCode)
 ````
-Returns a list of station names along the path
+Returns a list of station names along the path.
 
 ====
 To get a station code for a given station
@@ -54,4 +54,14 @@ To get a station code for a given station
   
   stationCode = getStationcode(stationName)
 ````
-Returns either a station code or None
+Returns either a station code or None.
+
+====
+To get a station close to a location
+```python
+  lat = '38.8522750'
+  lon = '-77.0423126'
+  
+  nearestStationCode = getNearestStation(lat, lon)
+```
+Returns the closest stationcode to the supplied location.
