@@ -39,10 +39,13 @@ Returns an integer that is the total time needed to go from one station to the n
 To get a path from one station to another 
 ```python
   startStationCode = 'F01' #Gallery place metro
+  startStationName = 'Gallery Place'
   
   endStationCode = 'A04' #Woodley Park metro
+  endStationName = 'Woodley'
   
   stopsAlongPath = getPath(startStationCode, endStationCode)
+  stopsAlongPath = getPath(startStationName, endStationName)
 ````
 Returns a list of station names along the path.
 
