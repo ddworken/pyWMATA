@@ -4,7 +4,7 @@ A python library for accessing the WMATA API for Washington DC Metro.
 ```python
   apikey = '' ###API keys available here https://developer.wmata.com/
 
-  api = WMATA(apikey)
+  api = pyWMATA.WMATA(apikey)
 ```
 
 =====
