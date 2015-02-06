@@ -46,6 +46,31 @@ class WMATA(object):
                                     ('N04', u'Spring Hill'), ('N06', u'Wiehle-Reston East')]
                         }
 
+    def getDirections(self, startStationCode, endStationCode):
+        directionStations = []
+        linesInCommon = []
+        startLines = self.getLines(startStationCode)
+        endLines = self.getLines(endStationCode)
+        for startLine in startLines:
+            for endLine in endLines:
+                if startLine == endLine:
+                    linesInCommon.append(startLine)
+        startIndex = -1
+        endIndex = -1
+        for line in linesInCommon:
+            for index,stationTuple in enumerate(self.database[line]):
+                if stationTuple[0] == startStationCode:
+                    startIndex = index
+                if stationTuple[0] == endStationCode:
+                    endIndex = index
+            print startIndex
+            print endIndex
+            if startIndex < endIndex:
+                directionStations.append((line,self.database[line][-1][1]))
+            if endIndex < startIndex:
+                directionStations.append((line,self.database[line][0][1]))
+        return directionStations
+
     def getTrainDepartures(self, stationcode, *direction):
         dom = self.getDom('http://api.wmata.com/StationPrediction.svc/GetPrediction/' + stationcode + '&')
         arrivalTimes = []
