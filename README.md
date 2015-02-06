@@ -50,6 +50,19 @@ To get a path from one station to another
 Returns a list of station names along the path.
 
 ====
+To get a human readable  path from one station to another
+```python
+  startStationCode = 'F01' #Gallery place metro
+  startStationName = 'Gallery Place'
+  
+  endStationCode = 'A04' #Woodley Park metro
+  endStationName = 'Woodley'
+  
+  pathDescription = getPathHumanReadable(startStationCode, endStationCode)
+  pathDescription = getPathHumanReadable(startStationName, endStationName)
+```
+
+====
 To get a station code for a given station
 ```python
   stationName = 'Woodley'
