@@ -2,8 +2,51 @@ import urllib2
 from xml.dom.minidom import parseString
 
 class WMATA(object):
+
     def __init__(self, apikey):
         self.apikey = apikey
+        self.transferStations = {'C13':('BL','YL'), 'C07':('BL','YL'), 'F03':('YL','GR','BL','SV','OR'), 'D03':('YL','GR','BL','SV','OR'), 'B01':('RD','YL','GR'),
+                                'F01':('RD','YL','GR'), 'A01':('BL','SV','OR','RD'), 'C01':('BL','SV','OR','RD'), 'D08':('SV','BL','OR'), 'C05':('BL','SV','OR'),
+                                'K05':('OR','SV'), 'B06':('RD','YL','GR'), 'E06':('RD','YL','GR')}
+        self.database = {
+                            'RD':[('A15', u'Shady Grove'), ('A14', u'Rockville'), ('A13', u'Twinbrook'), ('A12', u'White Flint'), ('A11', u'Grosvenor'),
+                                    ('A10', u'Medical Center'), ('A09', u'Bethesda'), ('A08', u'Friendship Heights'), ('A07', u'Tenleytown'),
+                                    ('A06', u'Van Ness UDC'), ('A05', u'Cleveland Park'), ('A04', u'Woodley Park Zoo'), ('A03', u'Dupont Circle'),
+                                    ('A02', u'Farragut North'), ('A01', u'Metro Center'), ('B01', u'Gallery Place'),('B02', u'Judiciary Square'),
+                                    ('B03', u'Union Station'), ('B35', u'New York Avenue'), ('B04', u'Rhode Island Avenue'), ('B05', u'Brookland'),
+                                    ('B06', u'Fort Totten'), ('B07', u'Takoma'), ('B08', u'Silver Spring'), ('B09', u'Forest Glen'), ('B10', u'Wheaton'),
+                                    ('B11', u'Glenmont')],
+                            'YL':[('C15', u'Huntington'), ('C14', u'Eisenhower Avenue'), ('C13', u'King Street'), ('C12', u'Braddock Road'),
+                                    ('C10', u'National Arpt'), ('C09', u'Crystal City'), ('C08', u'Pentagon City'), ('C07', u'Pentagon'),
+                                    ('F03', u"L'Enfant Plaza"), ('F02', u'Archives'), ('F01', u'Gallery Place'), ('E01', u'Mt Vernon Sq'), ('E02', u'Shaw'),
+                                    ('E03', u'U Street'), ('E04', u'Columbia Heights'), ('E05', u'Georgia Avenue'), ('E06', u'Fort Totten')],
+                            'BL':[('J03', u"Franconia-Springf'ld"), ('J02', u'Van Dorn St'),('C13', u'King Street'), ('C12', u'Braddock Road'),
+                                    ('C10', u'National Arpt'), ('C09', u'Crystal City'), ('C08', u'Pentagon City'), ('C07', u'Pentagon'),
+                                    ('C06', u'Arlington Cemetery'), ('C05', u'Rosslyn'), ('C04', u'Foggy Bottom'), ('C03', u'Farragut West'),
+                                    ('C02', u'McPherson Square'), ('C01', u'Metro Center'), ('D01', u'Federal Triangle'), ('D02', u'Smithsonian'),
+                                    ('D03', u"L'Enfant Plaza"), ('D04', u'Federal Center SW'), ('D05', u'Capitol South'), ('D06', u'Eastern Market'),
+                                    ('D07', u'Potomac Avenue'), ('D08', u'Stadium Armory'), ('G01', u'Benning Road'), ('G02', u'Capitol Heights'),
+                                    ('G03', u'Addison Road'), ('G04', u'Morgan Blvd'), ('G05', u'Largo Town Center')],
+                            'GR':[('E10', u'Greenbelt'), ('E09', u'College Park'), ('E08', u'Prince Georges Plaza'), ('E07', u'West Hyattsville'),
+                                    ('E06', u'Fort Totten'), ('E05', u'Georgia Avenue'), ('E04', u'Columbia Heights'), ('E03', u'U Street'), ('E02', u'Shaw'),
+                                    ('E01', u'Mt Vernon Sq'), ('F01', u'Gallery Place'), ('F02', u'Archives'), ('F03', u"L'Enfant Plaza"),
+                                    ('F04', u'Waterfront'), ('F05', u'Navy Yard'), ('F06', u'Anacostia'), ('F07', u'Congress Height'), ('F08', u'Southern Ave'),
+                                    ('F09', u'Naylor Road'), ('F10', u'Suitland'), ('F11', u'Branch Avenue')],
+                            'OR':[('D13', u'New Carrollton'), ('D12', u'Landover'), ('D11', u'Cheverly'), ('D10', u'Deanwood'), ('D09', u'Minnesota Avenue'),
+                                    ('D08', u'Stadium Armory'), ('D07', u'Potomac Avenue'), ('D06', u'Eastern Market'), ('D05', u'Capitol South'),
+                                    ('D04', u'Federal Center SW'), ('D03', u"L'Enfant Plaza"), ('D02', u'Smithsonian'), ('D01', u'Federal Triangle'),
+                                    ('C01', u'Metro Center'), ('C02', u'McPherson Square'), ('C03', u'Farragut West'), ('C04', u'Foggy Bottom'),
+                                    ('C05', u'Rosslyn'), ('K01', u'Court House'), ('K02', u'Clarendon'), ('K03', u'Virginia Square'), ('K04', u'Ballston'),
+                                    ('K05', u'E Falls Church'), ('K06', u'W Falls Church'), ('K07', u'Dunn Loring'), ('K08', u'Vienna')],
+                            'SV':[('G05', u'Largo Town Center'), ('G04', u'Morgan Blvd'), ('G03', u'Addison Road'), ('G02', u'Capitol Heights'),
+                                    ('G01', u'Benning Road'), ('D08', u'Stadium Armory'), ('D07', u'Potomac Avenue'), ('D06', u'Eastern Market'),
+                                    ('D05', u'Capitol South'), ('D04', u'Federal Center SW'), ('D03', u"L'Enfant Plaza"), ('D02', u'Smithsonian'),
+                                    ('D01', u'Federal Triangle'), ('C01', u'Metro Center'), ('C02', u'McPherson Square'), ('C03', u'Farragut West'),
+                                    ('C04', u'Foggy Bottom'), ('C05', u'Rosslyn'), ('K01', u'Court House'), ('K02', u'Clarendon'), ('K03', u'Virginia Square'),
+                                    ('K04', u'Ballston'), ('K05', u'E Falls Church'), ('N01', u'McLean'), ('N02', u'Tysons Corner'), ('N03', u'Greensboro'),
+                                    ('N04', u'Spring Hill'), ('N06', u'Wiehle-Reston East')]
+                        }
+
     def getTrainDepartures(self, stationcode, *direction):
         dom = self.getDom('http://api.wmata.com/StationPrediction.svc/GetPrediction/' + stationcode + '&')
         arrivalTimes = []
@@ -31,14 +74,14 @@ class WMATA(object):
         dom = self.getDom('https://api.wmata.com/Rail.svc/SrcStationToDstStationInfo?FromStationCode=' + startStationCode + '&ToStationCode=' + endStationCode + '&')
         return int(dom.getElementsByTagName('RailTime')[0].toxml().lower().replace('<railtime>','').replace('</railtime>',''))
 
-    def getLines(self, stationCode):
+    def getLines(self, stationCode, *recursion):
         lines = []
-        dom = self.getDom('https://api.wmata.com/Rail.svc/StationInfo?StationCode=' + stationCode + '&')
-        lines.append(str(dom.getElementsByTagName('LineCode1')[0].toxml().replace('<LineCode1>','').replace('</LineCode1>','').replace('<LineCode1 i:nil="true"/>','')))
-        lines.append(str(dom.getElementsByTagName('LineCode2')[0].toxml().replace('<LineCode2>','').replace('</LineCode2>','').replace('<LineCode2 i:nil="true"/>','')))
-        lines.append(str(dom.getElementsByTagName('LineCode3')[0].toxml().replace('<LineCode3>','').replace('</LineCode3>','').replace('<LineCode3 i:nil="true"/>','')))
-        lines.append(str(dom.getElementsByTagName('LineCode4')[0].toxml().replace('<LineCode4>','').replace('</LineCode4>','').replace('<LineCode4 i:nil="true"/>','')))
-        lines = filter(None, lines)
+        for key,value in self.database.iteritems():
+            for code in value:
+                if stationCode == code[0]:
+                    lines.append(key)
+        if self.hasDuplicate(stationCode) and not recursion:
+            lines.extend(self.getLines(self.getDuplicate(stationCode),'Don\'t recurse'))
         return lines
 
     def getPath(self, startStationCode, endStationCode):
@@ -47,17 +90,88 @@ class WMATA(object):
         for startLine in startLines:
             for endLine in endLines:
                 if startLine == endLine:
-                    sameLine = startLine
-                    print self.getTravelTime(startStationCode, endStationCode)
                     return self.getPathSameLine(startStationCode, endStationCode)
+        transferLocations = []
+        for key,value in self.transferStations.iteritems():
+            for startLine in startLines:
+                for endLine in endLines:
+                    if startLine in value:
+                        if endLine in value:
+                            transferLocations.append(key)
+        minLocation = None
+        totalLen = 10000
+        for index,transferStation in enumerate(transferLocations):
+            first = self.getPathSameLine(startStationCode, transferStation)
+            second = self.getPathSameLine(transferStation, endStationCode)
+            if len(first) + len(second) < totalLen:
+                firstFin = first
+                secondFin = second
+                totalLen = len(first) + len(second)
+                minLocation = transferStation
+        first = firstFin[:-1]#self.getPathSameLine(startStationCode, minLocation)[:-1] #remove last line so there are no duplicate stations in the list
+        first[0] = first[0] + ' (Start)'
+        second = secondFin#self.getPathSameLine(minLocation, endStationCode)
+        second[len(second) - 1] = second[len(second) - 1] + '(End)'
+        second[0] += ' (Transfer)' #Add (Transfer) to signify that one has to transfer here
+        return [i.encode('ascii') for i in (first+second)] #concat them and return it! :)
+
+    def getDuplicate(self, stationcode):
+        if stationcode == 'B01':
+            return 'F01'
+        if stationcode == 'F01':
+            return 'B01'
+        if stationcode == 'B06':
+            return 'E06'
+        if stationcode == 'E06':
+            return 'B06'
+        if stationcode == 'F03':
+            return 'D03'
+        if stationcode == 'D03':
+            return 'F03'
+        if stationcode == 'C01':
+            return 'A01'
+        if stationcode == 'A01':
+            return 'C01'
+        return stationcode
+
+    def hasDuplicate(self, stationcode):
+        if self.getDuplicate(stationcode) == stationcode:
+            return False
+        return True
 
     def getPathSameLine(self, startStationCode, endStationCode):
-        dom = self.getDom('https://api.wmata.com/Rail.svc/Path?FromStationCode=' + startStationCode + '&ToStationCode=' + endStationCode + '&')
-        stations = []
-        for item in dom.getElementsByTagName('StationName'):
-            item = item.toxml()
-            stations.append(item.replace('<StationName>','').replace('</StationName>','').encode("ascii"))
-        return stations
+        commonLines = []
+        startLines = self.getLines(startStationCode)
+        endLines = self.getLines(endStationCode)
+        for startLine in startLines:
+            for endLine in endLines:
+                if startLine == endLine:
+                    commonLines.append(startLine)
+        path = []
+        startIndex = -1
+        endIndex = -1
+        for line in commonLines:
+            for index,stationTuple in enumerate(self.database[line]):
+                if stationTuple[0] == startStationCode:
+                    startIndex = index
+                if stationTuple[0] == endStationCode:
+                    endIndex = index
+            if startIndex == -1 or endIndex == -1:
+                for index,stationTuple in enumerate(self.database[line]):
+                    if stationTuple[0] == self.getDuplicate(startStationCode):
+                        startIndex = index
+                    if stationTuple[0] == self.getDuplicate(endStationCode):
+                        endIndex = index
+            reverse = False
+            if startIndex > endIndex:
+                startIndex,endIndex = endIndex,startIndex
+                reverse = True
+            for i in range(startIndex, endIndex + 1):
+                #print self.database[line][i][1]
+                path.append(self.database[line][i][1])
+            if reverse:
+                path.reverse()
+        return path
 
     def getIncidents(self):
         dom = self.getDom('https://api.wmata.com/Incidents.svc/Incidents?')
@@ -80,18 +194,29 @@ class WMATA(object):
             return True
         return False
 
-    def getStationcode(self, stationname):
-        dom = self.getDom('https://api.wmata.com/Rail.svc/Stations?')
-        for nameIndex,name in enumerate(dom.getElementsByTagName('Name')):
-            if stationname.lower() in name.toxml().lower():
-                return dom.getElementsByTagName('Code')[nameIndex].toxml().replace('<Code>','').replace('</Code>','')
+    def getStationcode(self, stationName):
+        for key in self.database:
+            for stationTuple in self.database[key]:
+                if stationTuple[1] == stationName:
+                    return stationTuple[0]
+
+    def getStationName(self, stationCode):
+        for key in self.database:
+            for stationTuple in self.database[key]:
+                if stationTuple[0] == stationCode:
+                    return stationTuple[1]
 
     def getDom(self, url):
-        try:
-            xml = urllib2.urlopen(url + 'api_key=' + self.apikey + '&subscription-key=' + self.apikey)
-            return parseString(xml.read())
-        except:
-            print "Network communication error"
+        attempts = 0
+        print(url + 'api_key=' + self.apikey + '&subscription-key=' + self.apikey)
+        while attempts < 30: #Loop 30 times because the WMATA API sometimes just doesn't respond...
+            try:
+                xml = urllib2.urlopen(url + 'api_key=' + self.apikey + '&subscription-key=' + self.apikey)
+                return parseString(xml.read())
+            except:
+                attempts += 1
+        print "Network communication error"
+        exit(1)
 
     def getNearestStation(self, lat, lon):
         dom = self.getDom('https://api.wmata.com/Rail.svc/StationEntrances?Lat=' + lat + '&Lon=' + lon + '&Radius=0&')
