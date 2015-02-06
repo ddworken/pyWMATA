@@ -98,3 +98,13 @@ To check if their is an escalator or elevator problem at a station
   elevatorsAndEscalatorsIncident = getElevatorEscalatorIncidentsAtStation(stationCode)
 ```
 Returns True if there is an elevator or escalator outage and False if there is not.
+
+====
+To get the direction of the train you need to take between two stations
+```python
+  startStationCode = 'F01'
+  endStationCode = 'C13'
+  
+  possibleDirections = getDirections(startStationCode, endStationCode)
+```
+Returns an array of the possible directions you can take.
