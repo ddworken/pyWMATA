@@ -37,7 +37,6 @@ Returns an integer that is the total time needed to go from one station to the n
 
 =====
 To get a path from one station to another 
-Note: This requires that the two stations be on the same line, this will not work with stations on different lines.
 ```python
   startStationCode = 'F01' #Gallery place metro
   
@@ -55,6 +54,15 @@ To get a station code for a given station
   stationCode = getStationcode(stationName)
 ````
 Returns either a station code or None.
+
+====
+To get a station name for a given station code
+```python
+  stationCode = 'A04'
+  
+  stationName = getStationName(stationCode)
+```
+Returns either a station name or None. 
 
 ====
 To get a station close to a location
