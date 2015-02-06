@@ -131,6 +131,17 @@ class WMATA(object):
         second[0] = second[0].replace('(Start)','(Transfer)') #Add (Transfer) to signify that one has to transfer here
         return [i.encode('ascii') for i in (first+second)] #concat them and return it! :)
 
+    def getPathHumanReadable(self, startStationCode, endStationCode):
+        path = self.getPath(startStationCode, endStationCode)
+        output = ""
+        output += ('Enter the metro at ' + path[0].replace(' (Start)','') + '\n')
+        for stop in path:
+            if 'Transfer' in stop:
+                output += ('Transfer trains at ' + stop.replace(' (Transfer)','') + '\n')
+                break
+        output += ('Exit the metro at ' + path[-1].replace(' (End)','' + '\n'))
+        return output
+
     def getDuplicate(self, stationcode):
         if stationcode == 'B01':
             return 'F01'
