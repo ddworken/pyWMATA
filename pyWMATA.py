@@ -2,7 +2,6 @@ import urllib2
 from xml.dom.minidom import parseString
 
 class WMATA(object):
-
     def __init__(self, apikey):
         self.apikey = apikey
         self.transferStations = {'C13':('BL','YL'), 'C07':('BL','YL'), 'F03':('YL','GR','BL','SV','OR'), 'D03':('YL','GR','BL','SV','OR'), 'B01':('RD','YL','GR'),
@@ -84,7 +83,26 @@ class WMATA(object):
             lines.extend(self.getLines(self.getDuplicate(stationCode),'Don\'t recurse'))
         return lines
 
+    def isStationCode(self, stationcode):
+        if len(stationcode) == 3:
+            for line in self.database:
+                for stationTuple in self.database[line]:
+                    if stationTuple[0] == stationcode:
+                        return True
+        return False
+
+    def isStationName(self, stationName):
+        for line in self.database:
+            for stationTuple in self.database[line]:
+                if stationName.lower() in stationTuple[1].lower():
+                    return True
+        return False
+
     def getPath(self, startStationCode, endStationCode):
+        if not self.isStationCode(startStationCode):
+            startStationCode = self.getStationcode(startStationCode)
+        if not self.isStationCode(endStationCode):
+            endStationCode = self.getStationcode(endStationCode)
         startLines = self.getLines(startStationCode)
         endLines = self.getLines(endStationCode)
         for startLine in startLines:
@@ -109,10 +127,8 @@ class WMATA(object):
                 totalLen = len(first) + len(second)
                 minLocation = transferStation
         first = firstFin[:-1]#self.getPathSameLine(startStationCode, minLocation)[:-1] #remove last line so there are no duplicate stations in the list
-        first[0] = first[0] + ' (Start)'
         second = secondFin#self.getPathSameLine(minLocation, endStationCode)
-        second[len(second) - 1] = second[len(second) - 1] + '(End)'
-        second[0] += ' (Transfer)' #Add (Transfer) to signify that one has to transfer here
+        second[0] = second[0].replace('(Start)','(Transfer)') #Add (Transfer) to signify that one has to transfer here
         return [i.encode('ascii') for i in (first+second)] #concat them and return it! :)
 
     def getDuplicate(self, stationcode):
@@ -171,6 +187,9 @@ class WMATA(object):
                 path.append(self.database[line][i][1])
             if reverse:
                 path.reverse()
+            break
+        path[0] = path[0] + ' (Start)'
+        path[-1] = path[-1] + ' (End)'
         return path
 
     def getIncidents(self):
@@ -197,7 +216,7 @@ class WMATA(object):
     def getStationcode(self, stationName):
         for key in self.database:
             for stationTuple in self.database[key]:
-                if stationTuple[1] == stationName:
+                if stationName.lower() in stationTuple[1].lower():
                     return stationTuple[0]
 
     def getStationName(self, stationCode):
