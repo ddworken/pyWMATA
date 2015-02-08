@@ -63,12 +63,18 @@ class WMATA(object):
                     startIndex = index
                 if stationTuple[0] == endStationCode:
                     endIndex = index
-            print startIndex
-            print endIndex
+            if startIndex == -1 and self.hasDuplicate(startStationCode) and endIndex == -1 and self.hasDuplicate(endStationCode):
+                return self.getDirections(self.getDuplicate(startStationCode),self.getDuplicate(endStationCode))
+            if startIndex == -1 and self.hasDuplicate(startStationCode):
+                return self.getDirections(self.getDuplicate(startStationCode),endStationCode)
+            if endIndex == -1 and self.hasDuplicate(endStationCode):
+                return self.getDirections(startStationCode, self.getDuplicate(endStationCode))
             if startIndex < endIndex:
                 directionStations.append((line,self.database[line][-1][1]))
             if endIndex < startIndex:
                 directionStations.append((line,self.database[line][0][1]))
+            break
+        ###Do something here to take into account lines that do not always run?
         return directionStations
 
     def getTrainDepartures(self, stationcode, *direction):
@@ -133,7 +139,7 @@ class WMATA(object):
         for startLine in startLines:
             for endLine in endLines:
                 if startLine == endLine:
-                    return self.getPathSameLine(startStationCode, endStationCode)
+                    return self._getPathSameLine_(startStationCode, endStationCode)
         transferLocations = []
         for key,value in self.transferStations.iteritems():
             for startLine in startLines:
@@ -144,27 +150,29 @@ class WMATA(object):
         minLocation = None
         totalLen = 10000
         for index,transferStation in enumerate(transferLocations):
-            first = self.getPathSameLine(startStationCode, transferStation)
-            second = self.getPathSameLine(transferStation, endStationCode)
+            first = self._getPathSameLine_(startStationCode, transferStation)
+            second = self._getPathSameLine_(transferStation, endStationCode)
             if len(first) + len(second) < totalLen:
                 firstFin = first
                 secondFin = second
                 totalLen = len(first) + len(second)
                 minLocation = transferStation
-        first = firstFin[:-1]#self.getPathSameLine(startStationCode, minLocation)[:-1] #remove last line so there are no duplicate stations in the list
-        second = secondFin#self.getPathSameLine(minLocation, endStationCode)
-        second[0] = second[0].replace('(Start)','(Transfer)') #Add (Transfer) to signify that one has to transfer here
+        first = firstFin[:-1]#remove last line so there are no duplicate stations in the list
+        second = secondFin
+        first[0] = first[0] + ' (Start towards ' + self.getDirections(startStationCode, minLocation)[0][1] + ')'
+        second[0] = second[0] + ' (Transfer towards ' + self.getDirections(minLocation, endStationCode)[0][1] + ')'
+        second[-1] = second[-1] + ' (Exit)'
         return [i.encode('ascii') for i in (first+second)] #concat them and return it! :)
 
     def getPathHumanReadable(self, startStationCode, endStationCode):
         path = self.getPath(startStationCode, endStationCode)
         output = ""
-        output += ('Enter the metro at ' + path[0].replace(' (Start)','') + '\n')
+        output += ('Enter the metro at ' + path[0] + '\n')
         for stop in path:
             if 'Transfer' in stop:
-                output += ('Transfer trains at ' + stop.replace(' (Transfer)','') + '\n')
+                output += ('Transfer trains at ' + stop + '\n')
                 break
-        output += ('Exit the metro at ' + path[-1].replace(' (End)','' + '\n'))
+        output += ('Exit the metro at ' + path[-1] + '\n')
         return output
 
     def getDuplicate(self, stationcode):
@@ -191,7 +199,7 @@ class WMATA(object):
             return False
         return True
 
-    def getPathSameLine(self, startStationCode, endStationCode):
+    def _getPathSameLine_(self, startStationCode, endStationCode):
         commonLines = []
         startLines = self.getLines(startStationCode)
         endLines = self.getLines(endStationCode)
@@ -219,12 +227,15 @@ class WMATA(object):
                 startIndex,endIndex = endIndex,startIndex
                 reverse = True
             for i in range(startIndex, endIndex + 1):
-                #print self.database[line][i][1]
                 path.append(self.database[line][i][1])
             if reverse:
                 path.reverse()
             break
-        path[0] = path[0] + ' (Start)'
+        return path
+
+    def getPathSameLine(self, startStationCode, endStationCode):
+        path = self._getPathSameLine_(startStationCode, endStationCode)
+        path[0]=path[0] + ' (Start towards ' + self.getDirections(startStationCode,endStationCode)[0][1]  + ')'
         path[-1] = path[-1] + ' (End)'
         return path
 
