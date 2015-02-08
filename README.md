@@ -47,7 +47,7 @@ To get a path from one station to another
   stopsAlongPath = getPath(startStationCode, endStationCode)
   stopsAlongPath = getPath(startStationName, endStationName)
 ````
-Returns a list of station names along the path.
+Returns a list of station names along the path with transfers specified by (Transfer towards $station)
 
 ====
 To get a human readable  path from one station to another
@@ -61,6 +61,7 @@ To get a human readable  path from one station to another
   pathDescription = getPathHumanReadable(startStationCode, endStationCode)
   pathDescription = getPathHumanReadable(startStationName, endStationName)
 ```
+Returns a string that is a human readable description of the path including transfer directions.
 
 ====
 To get a station code for a given station
