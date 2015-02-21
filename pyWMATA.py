@@ -278,7 +278,6 @@ class WMATA(object):
 
     def getDom(self, url):
         attempts = 0
-        print(url + 'api_key=' + self.apikey + '&subscription-key=' + self.apikey)
         while attempts < 30: #Loop 30 times because the WMATA API sometimes just doesn't respond...
             try:
                 xml = urllib2.urlopen(url + 'api_key=' + self.apikey + '&subscription-key=' + self.apikey)
