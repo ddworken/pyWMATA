@@ -94,9 +94,10 @@ class WMATA(object):
 
     def getConnectionTimes(self, startArrivalTimes, endArrivalTimes, startStationCode, endStationCode):
         output = [["" for x in range(10)] for x in range(10)]
+        travelTime = self.getTravelTime(startStationCode, endStationCode)
         for indexStart,itemStart in enumerate(startArrivalTimes):
             for indexEnd,itemEnd in enumerate(endArrivalTimes):
-                output[indexStart][indexEnd] = itemEnd - (itemStart + self.getTravelTime(startStationCode, endStationCode))
+                output[indexStart][indexEnd] = itemEnd - (itemStart + travelTime)
         return output
 
     def processTimeToInt(self, xml):
