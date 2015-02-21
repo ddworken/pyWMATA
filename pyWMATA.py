@@ -78,10 +78,8 @@ class WMATA(object):
         return directionStations
 
     def getTrainDepartures(self, stationcode, *direction):
-        if not self.isStationCode(startStationCode):
-            startStationCode = self.getStationcode(startStationCode)
-        if not self.isStationCode(endStationCode):
-            endStationCode = self.getStationcode(endStationCode)
+        if not self.isStationCode(stationcode):
+            stationcode = self.getStationcode(stationcode)
         dom = self.getDom('http://api.wmata.com/StationPrediction.svc/GetPrediction/' + stationcode + '&')
         arrivalTimes = []
         if not direction:
